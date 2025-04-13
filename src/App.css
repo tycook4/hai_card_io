@@ -75,6 +75,10 @@
   font-weight: bold;
   cursor: pointer;
   transition: transform 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
 }
 
 .start-button:hover {
