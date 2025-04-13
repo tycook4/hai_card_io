@@ -45,7 +45,7 @@ const InstructionsPage = () => {
   };
 
   const handleSkipToGame = () => {
-    navigate('/game');
+    navigate('/gameplay');
   };
 
   return (
