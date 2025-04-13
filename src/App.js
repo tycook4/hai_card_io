@@ -2,6 +2,8 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import './App.css';
 import QuestionsPage from './QuestionsPage';
 import InstructionsPage from './InstructionsPage';
+import SuperlativesPage from './SuperlativesPage';
+import EndScreen from './EndScreen';
 
 function App() {
   return (
@@ -25,6 +27,8 @@ function App() {
         } />
         <Route path="/instructions" element={<InstructionsPage />} />
         <Route path="/questions" element={<QuestionsPage />} />
+        <Route path="/superlatives" element={<SuperlativesPage />} />
+        <Route path="/end" element={<EndScreen />} />
       </Routes>
     </Router>
   );
