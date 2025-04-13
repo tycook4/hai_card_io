@@ -1,31 +1,40 @@
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import './App.css';
+import GameplayPage from './GameplayPage';
 import QuestionsPage from './QuestionsPage';
-import InstructionsPage from './InstructionsPage';
+
+function LaunchPage() {
+  const navigate = useNavigate();
+
+  return (
+    <div className="launch-page">
+      <h1 className="title">Card.io</h1>
+      <button className="start-button" onClick={() => navigate('/questions')}>
+        Start
+      </button>
+      <div className="decorative-elements">
+        <div className="curve curve-1"></div>
+        <div className="curve curve-2"></div>
+        <div className="curve curve-3"></div>
+        <div className="curve curve-4"></div>
+        <div className="curve curve-5"></div>
+        <div className="curve curve-6"></div>
+      </div>
+    </div>
+  );
+}
 
 function App() {
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={
-          <div className="App">
-            <div className="launch-page">
-              <h1 className="title">Card.io</h1>
-              <Link to="/instructions" className="start-button">Start</Link>
-              <div className="decorative-elements">
-                <div className="curve curve-1"></div>
-                <div className="curve curve-2"></div>
-                <div className="curve curve-3"></div>
-                <div className="curve curve-4"></div>
-                <div className="curve curve-5"></div>
-                <div className="curve curve-6"></div>
-              </div>
-            </div>
-          </div>
-        } />
-        <Route path="/instructions" element={<InstructionsPage />} />
-        <Route path="/questions" element={<QuestionsPage />} />
-      </Routes>
+      <div className="App">
+        <Routes>
+          <Route path="/" element={<LaunchPage />} />
+          <Route path="/questions" element={<QuestionsPage />} />
+          <Route path="/gameplay" element={<GameplayPage />} />
+        </Routes>
+      </div>
     </Router>
   );
 }

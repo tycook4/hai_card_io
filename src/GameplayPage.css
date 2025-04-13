@@ -1,0 +1,193 @@
+.gameplay-container {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #FFFFFF;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.gameplay-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.logo {
+  font-size: 48px;
+  color: #ED5535;
+  margin: 0;
+}
+
+.rules-button {
+  background-color: #3CAE A3;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 15px 30px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.main-content {
+  display: flex;
+  justify-content: space-between;
+  flex: 1;
+}
+
+.players-section {
+  width: 250px;
+}
+
+.player-card {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.player-card:hover {
+  transform: scale(1.05);
+}
+
+.player-card:active {
+  transform: scale(0.95);
+}
+
+.player-avatar {
+  width: 101px;
+  height: 101px;
+  margin-right: 15px;
+}
+
+.user-icon {
+  width: 100%;
+  height: 100%;
+  stroke: #000;
+  stroke-width: 2;
+  fill: none;
+}
+
+.player-info {
+  font-size: 16px;
+  color: #000;
+}
+
+.cards-section {
+  position: relative;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card-stack {
+  position: relative;
+  width: 443px;
+  height: 601px;
+  perspective: 1000px;
+}
+
+.card-background {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 35px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 35px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 72px;
+  color: #ED5535;
+}
+
+.card-back {
+  background-color: #ED5535;
+  transform: rotate(-3deg);
+}
+
+.card-middle {
+  background-color: #3CAEA3;
+  transform: rotate(3deg);
+}
+
+.card-front {
+  background-color: #F6D55C;
+  z-index: 3;
+  font-size: 36px;
+  padding: 40px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.4;
+}
+
+.game-info {
+  width: 595px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.instructions-box {
+  background-color: #F1F9FF;
+  padding: 20px;
+  border-radius: 16px;
+  font-size: 18px;
+  color: rgba(0, 0, 0, 0.9);
+}
+
+.completed-cards {
+  background-color: #D9D9D9;
+  padding: 20px;
+  border-radius: 50px;
+  text-align: center;
+  font-size: 18px;
+  color: #000;
+}
+
+.gameplay-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+}
+
+.settings-button,
+.ask-question-button {
+  width: 96px;
+  height: 96px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.waste-bin {
+  width: 56px;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.elevated-button {
+  background-color: #F6D55C;
+  border: none;
+  border-radius: 50px;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: white;
+  box-shadow: 0 4px 8px rgba(64, 58, 80, 0.3);
+} 
