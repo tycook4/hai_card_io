@@ -6,9 +6,16 @@ const QuestionsPage = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedOption, setSelectedOption] = useState(null);
   const [themeInput, setThemeInput] = useState('');
+  const [playerCount, setPlayerCount] = useState(2); // Default to 2 players
   const navigate = useNavigate();
 
   const questions = [
+    {
+      type: 'player-count',
+      title: "How many players will be joining?",
+      min: 2,
+      max: 8
+    },
     {
       type: 'multiple-choice',
       title: "What's the goal of your game night?",
@@ -36,7 +43,7 @@ const QuestionsPage = () => {
     }
   ];
 
-  const progressPercentages = [13, 26, 55];
+  const progressPercentages = [10, 25, 50, 75];
 
   const handleOptionSelect = (index) => {
     setSelectedOption(index);
@@ -46,14 +53,18 @@ const QuestionsPage = () => {
     setThemeInput(e.target.value);
   };
 
+  const handlePlayerCountChange = (value) => {
+    setPlayerCount(Math.max(questions[0].min, Math.min(questions[0].max, value)));
+  };
+
   const handleNext = () => {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
       setSelectedOption(null);
       setThemeInput('');
     } else {
-      // Navigate to game when all questions are answered
-      navigate('/game');
+      // Navigate to gameplay with player count
+      navigate('/gameplay', { state: { playerCount } });
     }
   };
 
@@ -63,18 +74,41 @@ const QuestionsPage = () => {
       setSelectedOption(null);
       setThemeInput('');
     } else {
-      navigate('/game');
+      navigate('/gameplay', { state: { playerCount } });
     }
   };
 
   const handleSkipToGame = () => {
-    navigate('/game');
+    navigate('/gameplay', { state: { playerCount } });
   };
 
   const renderQuestion = () => {
     const question = questions[currentQuestion];
     
-    if (question.type === 'multiple-choice') {
+    if (question.type === 'player-count') {
+      return (
+        <div className="player-count-container">
+          <div className="player-count-controls">
+            <button 
+              className="player-count-button"
+              onClick={() => handlePlayerCountChange(playerCount - 1)}
+              disabled={playerCount <= question.min}
+            >
+              -
+            </button>
+            <span className="player-count">{playerCount}</span>
+            <button 
+              className="player-count-button"
+              onClick={() => handlePlayerCountChange(playerCount + 1)}
+              disabled={playerCount >= question.max}
+            >
+              +
+            </button>
+          </div>
+          <p className="player-count-hint">Min: {question.min}, Max: {question.max} players</p>
+        </div>
+      );
+    } else if (question.type === 'multiple-choice') {
       return (
         <div className="options-container">
           {question.options.map((option, index) => (
@@ -115,7 +149,10 @@ const QuestionsPage = () => {
         <button 
           className="button next" 
           onClick={handleNext}
-          disabled={questions[currentQuestion].type === 'multiple-choice' && selectedOption === null}
+          disabled={
+            (questions[currentQuestion].type === 'multiple-choice' && selectedOption === null) ||
+            (questions[currentQuestion].type === 'player-count' && !playerCount)
+          }
         >
           {currentQuestion === questions.length - 1 ? 'Start Game' : 'Next'}
         </button>
