@@ -15,7 +15,7 @@ const Card = ({ content, color, isFlipped, rotation, zIndex, onClick }) => {
         <div className="card-front" style={{ backgroundColor: color }}>
           {content}
         </div>
-        <div className="card-back" style={{ backgroundColor: '#ED5535' }}>
+        <div className="card-back" style={{ backgroundColor: color }}>
           <span>Card.io</span>
         </div>
       </div>
