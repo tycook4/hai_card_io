@@ -1,8 +1,9 @@
 import os
 from dotenv import load_dotenv
-from langchain.chat_models import ChatGroq
 from langchain.prompts import ChatPromptTemplate
 from langchain.chains import LLMChain
+#from langchain_community.chat_models import ChatGroq
+from langchain_groq import ChatGroq
 
 load_dotenv()
 
