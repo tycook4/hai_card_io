@@ -5,13 +5,15 @@ import Card from './components/Card';
 
 const GameplayPage = () => {
   const location = useLocation();
-  const playerCount = location.state?.playerCount || 2; // Default to 2 if not specified
+  const playerCount = location.state?.playerCount || 2;
   const [completedCards, setCompletedCards] = useState(0);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState(null);
+  const [cardDeck, setCardDeck] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [categories, setCategories] = useState(['fun', 'personal', 'creative']);
   const [players, setPlayers] = useState(() => {
-    // Generate initial players array based on count
     return Array(playerCount).fill(null).map((_, index) => ({
       name: `Player ${index + 1}`,
       points: 0
@@ -20,29 +22,44 @@ const GameplayPage = () => {
   
   const navigate = useNavigate();
   
-  // Sample card deck - you can expand this with more cards
-  const cardDeck = [
-    {
-      content: "Tell a story about your most embarrassing moment",
-      color: "#F6D55C"
-    },
-    {
-      content: "What's your biggest fear?",
-      color: "#3CAEA3"
-    },
-    {
-      content: "If you could have any superpower, what would it be?",
-      color: "#ED5535"
-    },
-    {
-      content: "What's your favorite childhood memory?",
-      color: "#20639B"
-    },
-    {
-      content: "If you could travel anywhere right now, where would you go?",
-      color: "#173F5F"
-    }
-  ];
+  useEffect(() => {
+    const fetchCards = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch('http://localhost:8000/api/generate-cards', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            categories: ['funny', 'serious', 'creative']
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        if (!data.success || !Array.isArray(data.cards)) {
+          throw new Error('Invalid response format from server');
+        }
+
+        setCardDeck(data.cards);
+      } catch (error) {
+        console.error('Error fetching cards:', error);
+        setIsLoading(false);
+      }
+    };
+
+    fetchCards();
+  }, []);
+
+  const getRandomColor = () => {
+    const colors = ["#F6D55C", "#3CAEA3", "#ED5535", "#20639B", "#173F5F"];
+    return colors[Math.floor(Math.random() * colors.length)];
+  };
 
   const handleRulesClick = () => {
     navigate('/instructions');
@@ -164,14 +181,16 @@ const GameplayPage = () => {
             <div className="card card-background" style={{ transform: 'rotate(-3deg)', backgroundColor: '#3CAEA3', zIndex: 4 }} />
             
             {/* Main interactive card */}
-            <Card
-              content={cardDeck[currentCardIndex].content}
-              color={cardDeck[currentCardIndex].color}
-              isFlipped={isFlipped}
-              rotation={0}
-              zIndex={5}
-              onClick={handleCardClick}
-            />
+            {cardDeck.length > 0 && (
+              <Card
+                content={cardDeck[currentCardIndex].content}
+                color={cardDeck[currentCardIndex].color}
+                isFlipped={isFlipped}
+                rotation={0}
+                zIndex={5}
+                onClick={handleCardClick}
+              />
+            )}
           </div>
         </div>
 

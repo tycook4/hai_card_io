@@ -1,29 +1,65 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from typing import List
 from langchain_utils import generate_game_cards, generate_superlatives
+import random
 
 app = FastAPI()
 
-# Allow frontend on localhost
+# Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],  # Allows all origins
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
 )
 
+class CardRequest(BaseModel):
+    categories: List[str]
+
+class GameData(BaseModel):
+    players: List[str]
+    scores: dict
+
 @app.post("/api/generate-cards")
-async def generate_cards(request: Request):
-    data = await request.json()
-    categories = data.get("categories", [])
-    cards = generate_game_cards(categories)
-    return {"cards": cards}
+async def generate_cards(request: CardRequest):
+    try:
+        if not request.categories:
+            raise HTTPException(status_code=400, detail="Categories list cannot be empty")
+        
+        cards = await generate_game_cards(request.categories)
+        
+        # Add random colors to each card
+        colors = ["#F6D55C", "#3CAEA3", "#ED5535", "#20639B", "#173F5F"]
+        cards_with_colors = [
+            {
+                "content": card,
+                "color": random.choice(colors)
+            }
+            for card in cards
+        ]
+        
+        return {
+            "success": True,
+            "cards": cards_with_colors
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/generate-superlatives")
-async def generate_supes(request: Request):
-    data = await request.json()
-    game_data = data.get("gameData", [])
-    superlatives = generate_superlatives(game_data)
-    return {"superlatives": superlatives}
+async def generate_superlatives_endpoint(game_data: GameData):
+    try:
+        superlatives = generate_superlatives(game_data.dict())
+        return {
+            "success": True,
+            "superlatives": superlatives
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
 
