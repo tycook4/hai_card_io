@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 from langchain_utils import generate_game_cards, generate_superlatives
 import random
 
@@ -16,8 +16,14 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
+class GamePreferences(BaseModel):
+    goal: Optional[str] = None
+    personalization: Optional[str] = None
+    themes: Optional[str] = None
+
 class CardRequest(BaseModel):
-    categories: List[str]
+    gamePreferences: GamePreferences
+    existingCards: Optional[List[str]] = None
 
 class GameData(BaseModel):
     players: List[str]
@@ -26,10 +32,7 @@ class GameData(BaseModel):
 @app.post("/api/generate-cards")
 async def generate_cards(request: CardRequest):
     try:
-        if not request.categories:
-            raise HTTPException(status_code=400, detail="Categories list cannot be empty")
-        
-        cards = await generate_game_cards(request.categories)
+        cards = await generate_game_cards(request.gamePreferences, request.existingCards)
         
         # Add random colors to each card
         colors = ["#F6D55C", "#3CAEA3", "#ED5535", "#20639B", "#173F5F"]

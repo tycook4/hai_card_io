@@ -18,36 +18,76 @@ llm = ChatGroq(
     temperature=0.7
 )
 
-async def generate_game_cards(categories):
+async def generate_game_cards(game_preferences, existing_cards=None):
     try:
-        print(f"Generating cards for categories: {categories}")
-        prompt = ChatPromptTemplate.from_template(
-            """Create 3 unique party game cards based on these categories: {categories}. 
-            Each card should be a fun, engaging question or prompt that players can answer or act out.
+        print(f"Generating cards with preferences: {game_preferences}")
+        
+        # Build the context based on game preferences first
+        preferences_context = ""
+        if game_preferences.goal:
+            preferences_context += f"""The goal of the game was chosen from these options:
+            - Get to know new friends
+            - Tell-all with close friends
+            - Casual chatty debates
+            - Lightly competitive fun
             
-            For example, if the categories were "funny" and "serious", you might return:
-            [
-                "If you could have any superpower for a day, what would it be and why?",
-                "Describe your most embarrassing moment in 3 words or less",
-                "What's the weirdest food combination you secretly love?"
-            ]
+            The selected goal is: {game_preferences.goal}
+            This means the cards should help achieve this specific goal.\n\n"""
             
-            Important rules:
-            1. Return ONLY a valid JSON array of strings
-            2. Each string should be a complete question or prompt
-            3. Make the prompts fun and engaging
-            4. Keep responses concise but interesting
+        if game_preferences.personalization:
+            preferences_context += f"""The level of personalization was chosen from these options:
+            - Not personalized at all
+            - Doesn't need to start out personalized, can learn as it goes
+            - Personalized to reference certain themes or ideas
+            - Highly personalized for each player
             
-            Your response should be a JSON array of exactly 3 strings, like this:
-            [
-                "string 1",
-                "string 2",
-                "string 3"
-            ]"""
-        )
+            The selected level is: {game_preferences.personalization}
+            Adjust the card content accordingly to match this level of personalization.\n\n"""
+            
+        if game_preferences.themes:
+            preferences_context += f"""The players specifically mentioned they want to include these themes or topics:
+            {game_preferences.themes}
+            
+            Make sure to incorporate these themes into the cards while keeping them fun and engaging.\n\n"""
+
+        # Add context about existing cards to avoid repetition
+        if existing_cards:
+            preferences_context += f"""\nHere are the questions that have already been generated:
+            {', '.join(existing_cards)}
+            
+            Make sure to generate completely new and different questions that haven't been used before.\n\n"""
+
+        # Now build the prompt template with the context
+        prompt_template = """Create 20 unique party game cards based on these preferences:
+
+        {preferences_context}
+        
+        Each card should be a fun, engaging question or prompt that players can answer or act out.
+        
+        Important rules:
+        1. Return ONLY a valid JSON array of strings
+        2. Each string should be a complete question or prompt
+        3. Make the prompts fun and engaging
+        4. Keep responses concise but interesting
+        5. Tailor the prompts to match the game's goal and themes
+        6. Consider the context of how these preferences were chosen
+        7. Generate exactly 20 unique questions
+        8. Make sure the questions are different from any existing ones
+        
+        Your response should be a JSON array of exactly 20 strings, like this:
+        [
+            "string 1",
+            "string 2",
+            ...
+            "string 20"
+        ]"""
+
+        prompt = ChatPromptTemplate.from_template(prompt_template)
         chain = LLMChain(llm=llm, prompt=prompt)
         print("Running LLM chain...")
-        result = await chain.arun({"categories": ", ".join(categories)})
+        result = await chain.arun({
+            "preferences_context": preferences_context
+        })
         print(f"Raw LLM response: {result}")
         
         # Try to parse the response as JSON

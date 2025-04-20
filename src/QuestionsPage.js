@@ -7,6 +7,11 @@ const QuestionsPage = () => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [themeInput, setThemeInput] = useState('');
   const [playerCount, setPlayerCount] = useState(2); // Default to 2 players
+  const [gamePreferences, setGamePreferences] = useState({
+    goal: null,
+    personalization: null,
+    themes: ''
+  });
   const navigate = useNavigate();
 
   const questions = [
@@ -59,12 +64,30 @@ const QuestionsPage = () => {
 
   const handleNext = () => {
     if (currentQuestion < questions.length - 1) {
+      // Save current answer before moving to next question
+      if (currentQuestion === 1) {
+        setGamePreferences(prev => ({ ...prev, goal: questions[1].options[selectedOption] }));
+      } else if (currentQuestion === 2) {
+        setGamePreferences(prev => ({ ...prev, personalization: questions[2].options[selectedOption] }));
+      } else if (currentQuestion === 3) {
+        setGamePreferences(prev => ({ ...prev, themes: themeInput }));
+      }
+
       setCurrentQuestion(currentQuestion + 1);
       setSelectedOption(null);
       setThemeInput('');
     } else {
-      // Navigate to gameplay with player count
-      navigate('/gameplay', { state: { playerCount } });
+      // Save final answer and navigate
+      setGamePreferences(prev => ({ ...prev, themes: themeInput }));
+      navigate('/gameplay', { 
+        state: { 
+          playerCount,
+          gamePreferences: {
+            ...gamePreferences,
+            themes: themeInput
+          }
+        } 
+      });
     }
   };
 
@@ -74,12 +97,22 @@ const QuestionsPage = () => {
       setSelectedOption(null);
       setThemeInput('');
     } else {
-      navigate('/gameplay', { state: { playerCount } });
+      navigate('/gameplay', { 
+        state: { 
+          playerCount,
+          gamePreferences
+        } 
+      });
     }
   };
 
   const handleSkipToGame = () => {
-    navigate('/gameplay', { state: { playerCount } });
+    navigate('/gameplay', { 
+      state: { 
+        playerCount,
+        gamePreferences
+      } 
+    });
   };
 
   const renderQuestion = () => {

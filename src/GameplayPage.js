@@ -5,14 +5,15 @@ import Card from './components/Card';
 
 const GameplayPage = () => {
   const location = useLocation();
-  const playerCount = location.state?.playerCount || 2;
+  const { playerCount, gamePreferences } = location.state || { playerCount: 2, gamePreferences: {} };
   const [completedCards, setCompletedCards] = useState(0);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState(null);
   const [cardDeck, setCardDeck] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [categories, setCategories] = useState(['fun', 'personal', 'creative']);
+  const [usedCards, setUsedCards] = useState([]);
+  
   const [players, setPlayers] = useState(() => {
     return Array(playerCount).fill(null).map((_, index) => ({
       name: `Player ${index + 1}`,
@@ -22,39 +23,41 @@ const GameplayPage = () => {
   
   const navigate = useNavigate();
   
-  useEffect(() => {
-    const fetchCards = async () => {
-      try {
-        setIsLoading(true);
-        const response = await fetch('http://localhost:8000/api/generate-cards', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            categories: ['funny', 'serious', 'creative']
-          })
-        });
+  const fetchCards = async (existingCards = []) => {
+    try {
+      setIsLoading(true);
+      const response = await fetch('http://localhost:8000/api/generate-cards', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          gamePreferences,
+          existingCards
+        })
+      });
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        
-        if (!data.success || !Array.isArray(data.cards)) {
-          throw new Error('Invalid response format from server');
-        }
-
-        setCardDeck(data.cards);
-      } catch (error) {
-        console.error('Error fetching cards:', error);
-        setIsLoading(false);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    };
 
+      const data = await response.json();
+      
+      if (!data.success || !Array.isArray(data.cards)) {
+        throw new Error('Invalid response format from server');
+      }
+
+      setCardDeck(prevDeck => [...prevDeck, ...data.cards]);
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error fetching cards:', error);
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchCards();
-  }, []);
+  }, [gamePreferences]);
 
   const getRandomColor = () => {
     const colors = ["#F6D55C", "#3CAEA3", "#ED5535", "#20639B", "#173F5F"];
@@ -74,7 +77,18 @@ const GameplayPage = () => {
     
     // Wait for flip animation to complete before changing card
     setTimeout(() => {
-      setCurrentCardIndex((prevIndex) => (prevIndex + 1) % cardDeck.length);
+      setCurrentCardIndex((prevIndex) => {
+        const newIndex = prevIndex + 1;
+        
+        // If we're getting close to the end of the deck, fetch more cards
+        if (newIndex + 5 >= cardDeck.length) {
+          const usedCardContents = cardDeck.slice(0, newIndex).map(card => card.content);
+          setUsedCards(usedCardContents);
+          fetchCards(usedCardContents);
+        }
+        
+        return newIndex;
+      });
       setIsFlipped(false);
     }, 800);
   };
