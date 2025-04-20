@@ -1,37 +1,57 @@
+/* Original styles - attempt to restore */
 .questions-page {
   position: relative;
   width: 100%;
   min-height: 100vh;
   background-color: white;
-  padding: 92px 68px;
+  padding: 60px 68px; /* Reduced top padding slightly */
   box-sizing: border-box;
 }
 
 .question-title {
   color: #ED5543;
   font-size: clamp(36px, 4vw, 48px);
-  margin-bottom: 132px;
+  margin-bottom: 60px; /* Reduced default margin */
   font-weight: bold;
 }
 
 .options-container {
   background-color: #F1F9FF;
   border-radius: 16px;
-  padding: 33px 0;
+  padding: 33px 68px;
   margin-bottom: 40px;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex; /* Use flexbox for the container */
+  flex-direction: column; /* Explicitly stack children vertically */
+  gap: 20px; /* Use gap for spacing */
+  /* border: 2px solid red; /* --- REMOVE DEBUG BORDER --- */
 }
 
 .option {
   display: flex;
   align-items: center;
-  padding: 20px 68px;
+  flex-direction: row; /* Explicitly set direction for checkbox and text */
+  width: 100%;
+  height: 45px;
+  box-sizing: border-box;
+  padding: 0;
+  overflow: hidden;
   cursor: pointer;
   transition: background-color 0.2s;
-  gap: 20px;
+  /* border: 1px solid blue; /* --- REMOVE DEBUG BORDER --- */
+}
+
+.option:last-child {
+  /* margin-bottom: 0; /* Removed, using gap on parent */
 }
 
 .option:hover {
   background-color: rgba(0, 0, 0, 0.05);
+}
+
+.option.selected {
+  background-color: rgba(60, 174, 163, 0.1);
 }
 
 .checkbox {
@@ -39,8 +59,12 @@
   height: 45px;
   border: 1.2px solid #A0A8B5;
   border-radius: 5px;
-  flex-shrink: 0;
   background-color: white;
+  flex-shrink: 0; /* Prevent checkbox from shrinking */
+  margin-right: 15px; /* Increased space between checkbox and text */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .option.selected .checkbox {
@@ -48,12 +72,24 @@
   border-color: #3CAEA3;
 }
 
-.option span {
-  font-size: clamp(16px, 2vw, 20px);
-  color: black;
-  line-height: 1.4;
+.option.selected .checkbox::after {
+  content: '✓';
+  color: white;
+  font-size: 24px;
+  line-height: 1;
 }
 
+.option span {
+  flex: 1; /* Take remaining space */
+  white-space: nowrap; /* Prevent text wrapping */
+  overflow: hidden; /* Hide overflow */
+  text-overflow: ellipsis; /* Show ellipsis for long text */
+  font-size: clamp(16px, 2vw, 20px);
+  color: black;
+  text-align: left; /* Explicitly align text to the left */
+}
+
+/* Restored Button Styles */
 .buttons-container {
   display: flex;
   justify-content: space-between;
@@ -88,6 +124,7 @@
   background-color: #3CAEA3;
 }
 
+/* Restored Progress Bar Styles */
 .progress-bar {
   width: 100%;
   height: 30px;
@@ -97,7 +134,7 @@
 }
 
 .progress-fill {
-  width: 13%;
+  /* width: 13%; /* Width is dynamic */
   height: 100%;
   background-color: #3CAEA3;
   border-radius: 300px;
@@ -113,11 +150,12 @@
   font-weight: bold;
 }
 
+/* Restored Input Styles */
 .input-container {
   width: 100%;
-  max-width: 1508px;
+  max-width: 1508px; /* Match Figma? Might need adjustment */
   margin: 0 auto 60px;
-  padding: 0 20px;
+  padding: 0; /* Container has padding */
 }
 
 .theme-input {
@@ -132,6 +170,7 @@
   outline: none;
   transition: all 0.3s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box; /* Add box-sizing */
 }
 
 .theme-input:focus {
@@ -143,55 +182,13 @@
   color: #CDCBCB;
 }
 
-/* Responsive styles */
-@media (max-width: 768px) {
-  .questions-page {
-    padding: 60px 30px;
-  }
-
-  .option {
-    padding: 15px 30px;
-  }
-
-  .buttons-container {
-    flex-direction: column;
-    gap: 20px;
-    align-items: center;
-  }
-
-  .button {
-    width: 100%;
-    max-width: 270px;
-  }
-}
-
-@media (max-width: 480px) {
-  .questions-page {
-    padding: 40px 20px;
-  }
-
-  .question-title {
-    margin-bottom: 80px;
-  }
-
-  .option {
-    padding: 12px 20px;
-  }
-
-  .checkbox {
-    width: 35px;
-    height: 35px;
-  }
-}
-
-/* Add these styles to your existing QuestionsPage.css */
-
+/* Restored Player Count Styles */
 .player-count-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 20px;
-  margin: 30px 0;
+  margin: 30px 0 60px; /* Adjust margins */
 }
 
 .player-count-controls {
@@ -229,4 +226,120 @@
 .player-count-hint {
   color: #666;
   font-size: 14px;
+}
+
+/* --- Responsive styles --- */
+
+/* Tablet */
+@media (max-width: 768px) {
+  .questions-page {
+    padding: 40px 30px; /* Adjusted padding */
+  }
+
+  .question-title {
+    margin-bottom: 40px; /* Adjust margin for tablet */
+  }
+
+  .options-container {
+    padding: 25px 30px; /* Adjusted padding */
+  }
+
+  .option {
+    /* Height remains 45px, looks okay on tablet */
+    margin-bottom: 15px; /* Slightly reduce space between options */
+  }
+
+  .checkbox {
+    /* Size remains 42x45px */
+    margin-right: 10px; /* Adjust space */
+  }
+
+  .buttons-container {
+    flex-direction: column;
+    gap: 15px; /* Adjust gap */
+    align-items: center;
+    margin-bottom: 40px; /* Adjust margin */
+  }
+
+  .button {
+    width: 100%;
+    max-width: 300px; /* Slightly larger max-width */
+    height: 60px; /* Adjust height */
+  }
+
+  .progress-bar {
+    height: 25px; /* Adjust height */
+  }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .questions-page {
+    padding: 30px 20px; /* Further reduced padding */
+  }
+
+  .question-title {
+    font-size: clamp(28px, 6vw, 36px); /* Adjust font size */
+    margin-bottom: 30px; /* Further reduced margin */
+  }
+
+  .options-container {
+    padding: 20px 20px; /* Further reduced padding */
+    margin-bottom: 30px;
+  }
+
+  .option {
+    height: auto; /* Allow height to adjust to content */
+    min-height: 40px; /* Minimum height */
+    margin-bottom: 10px; /* Further reduce space */
+    align-items: flex-start; /* Align items to top for potentially wrapped text */
+    padding-top: 5px; /* Add some padding for alignment */
+    padding-bottom: 5px;
+  }
+
+  .checkbox {
+    width: 30px; /* Smaller checkbox */
+    height: 30px;
+    margin-top: 2px; /* Align with text start */
+    margin-right: 10px;
+  }
+
+  .option.selected .checkbox::after {
+    font-size: 18px; /* Smaller checkmark */
+  }
+
+  .option span {
+    white-space: normal; /* Allow text wrapping on mobile */
+    overflow: visible;
+    text-overflow: clip;
+    line-height: 1.3; /* Adjust line height for wrapping */
+  }
+
+  .button {
+    height: 50px; /* Smaller buttons */
+    font-size: clamp(14px, 4vw, 16px);
+    max-width: 100%; /* Allow full width */
+  }
+
+  .progress-bar {
+    height: 20px; /* Smaller progress bar */
+  }
+
+  .progress-text {
+    font-size: 12px;
+  }
+
+  .theme-input {
+    height: 100px; /* Adjust textarea height */
+    font-size: 16px;
+  }
+
+  .player-count {
+    font-size: 28px;
+  }
+  .player-count-button {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
 } 
