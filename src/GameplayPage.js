@@ -13,14 +13,27 @@ const GameplayPage = () => {
   const [cardDeck, setCardDeck] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [usedCards, setUsedCards] = useState([]);
+  const [cardsInitialized, setCardsInitialized] = useState(false);
+  const [playerPerformance, setPlayerPerformance] = useState({});
   
   const [players, setPlayers] = useState(() => {
     return Array(playerCount).fill(null).map((_, index) => ({
       name: `Player ${index + 1}`,
-      points: 0
+      points: 0,
+      correctCards: []
     }));
   });
   
+  useEffect(() => {
+    const initialPerformance = {};
+    players.forEach(player => {
+      initialPerformance[player.name] = {
+        correctCards: []
+      };
+    });
+    setPlayerPerformance(initialPerformance);
+  }, []);
+
   const navigate = useNavigate();
   
   const fetchCards = async (existingCards = []) => {
@@ -47,8 +60,15 @@ const GameplayPage = () => {
         throw new Error('Invalid response format from server');
       }
 
-      setCardDeck(prevDeck => [...prevDeck, ...data.cards]);
+      const colors = ["#F6D55C", "#3CAEA3", "#ED5535", "#20639B", "#173F5F"];
+      const coloredCards = data.cards.map((card, index) => ({
+        ...card,
+        color: colors[index % colors.length]
+      }));
+
+      setCardDeck(prevDeck => [...prevDeck, ...coloredCards]);
       setIsLoading(false);
+      setCardsInitialized(true);
     } catch (error) {
       console.error('Error fetching cards:', error);
       setIsLoading(false);
@@ -69,18 +89,25 @@ const GameplayPage = () => {
   };
 
   const handleEndGame = () => {
-    navigate('/superlatives');
+    const gameData = {
+      players: players.map(player => ({
+        name: player.name,
+        points: player.points,
+        correctAnswers: playerPerformance[player.name]?.correctCards || []
+      })),
+      gamePreferences: gamePreferences
+    };
+    
+    navigate('/superlatives', { state: { gameData } });
   };
 
   const handleCardClick = () => {
     setIsFlipped(true);
     
-    // Wait for flip animation to complete before changing card
     setTimeout(() => {
       setCurrentCardIndex((prevIndex) => {
         const newIndex = prevIndex + 1;
         
-        // If we're getting close to the end of the deck, fetch more cards
         if (newIndex + 5 >= cardDeck.length) {
           const usedCardContents = cardDeck.slice(0, newIndex).map(card => card.content);
           setUsedCards(usedCardContents);
@@ -94,12 +121,37 @@ const GameplayPage = () => {
   };
 
   const handlePlayerClick = (playerIndex) => {
-    if (editingPlayer !== null) return; // Don't award points while editing names
-    setPlayers(players.map((player, index) => 
+    if (editingPlayer !== null) return;
+
+    const player = players[playerIndex];
+    const currentCard = cardDeck[currentCardIndex % cardDeck.length];
+
+    setPlayers(players.map((p, index) => 
       index === playerIndex 
-        ? { ...player, points: player.points + 1 }
-        : player
+        ? { 
+            ...p, 
+            points: p.points + 1, 
+            correctCards: [...p.correctCards, currentCard.content] 
+          }
+        : p
     ));
+
+    setPlayerPerformance(prev => {
+      const updatedPerformance = { ...prev };
+      
+      const playerName = player.name;
+      if (!updatedPerformance[playerName]) {
+        updatedPerformance[playerName] = { correctCards: [] };
+      }
+      
+      updatedPerformance[playerName].correctCards.push({
+        content: currentCard.content,
+        color: currentCard.color
+      });
+      
+      return updatedPerformance;
+    });
+
     setCompletedCards((prev) => prev + 1);
   };
 
@@ -109,13 +161,28 @@ const GameplayPage = () => {
 
   const handleNameChange = (event, playerIndex) => {
     if (event.key === 'Enter') {
+      const oldName = players[playerIndex].name;
       const newName = event.target.value.trim();
+      
       if (newName) {
         setPlayers(players.map((player, index) => 
           index === playerIndex 
             ? { ...player, name: newName }
             : player
         ));
+        
+        setPlayerPerformance(prev => {
+          const updatedPerformance = { ...prev };
+          
+          if (updatedPerformance[oldName]) {
+            updatedPerformance[newName] = updatedPerformance[oldName];
+            delete updatedPerformance[oldName];
+          } else {
+            updatedPerformance[newName] = { correctCards: [] };
+          }
+          
+          return updatedPerformance;
+        });
       }
       setEditingPlayer(null);
     } else if (event.key === 'Escape') {
@@ -126,7 +193,6 @@ const GameplayPage = () => {
   const handleTrashClick = () => {
     setIsFlipped(true);
     
-    // Wait for flip animation to complete before changing card
     setTimeout(() => {
       setCurrentCardIndex((prevIndex) => (prevIndex + 1) % cardDeck.length);
       setIsFlipped(false);
@@ -135,6 +201,16 @@ const GameplayPage = () => {
 
   return (
     <div className="gameplay-container">
+      {isLoading && (
+        <div className="loading-overlay">
+          <div className="loading-content">
+            <div className="spinner"></div>
+            <h2>Generating your personalized cards...</h2>
+            <p>Creating fun questions based on your preferences</p>
+          </div>
+        </div>
+      )}
+      
       <header className="gameplay-header">
         <h1 className="logo">Card.io</h1>
         <div className="header-buttons">
@@ -188,23 +264,23 @@ const GameplayPage = () => {
 
         <div className="cards-section">
           <div className="card-stack">
-            {/* Background cards for visual effect */}
             <div className="card card-background" style={{ transform: 'rotate(-12deg)', backgroundColor: '#F6D55C', zIndex: 1 }} />
             <div className="card card-background" style={{ transform: 'rotate(-9deg)', backgroundColor: '#20639B', zIndex: 2 }} />
             <div className="card card-background" style={{ transform: 'rotate(-6deg)', backgroundColor: '#ED5535', zIndex: 3 }} />
             <div className="card card-background" style={{ transform: 'rotate(-3deg)', backgroundColor: '#3CAEA3', zIndex: 4 }} />
             
-            {/* Main interactive card */}
-            {cardDeck.length > 0 && (
+            {cardDeck.length > 0 ? (
               <Card
-                content={cardDeck[currentCardIndex].content}
-                color={cardDeck[currentCardIndex].color}
+                content={cardDeck[currentCardIndex % cardDeck.length].content}
+                color={cardDeck[currentCardIndex % cardDeck.length].color}
                 isFlipped={isFlipped}
                 rotation={0}
                 zIndex={5}
                 onClick={handleCardClick}
               />
-            )}
+            ) : !isLoading ? (
+              <div className="empty-card">No cards available</div>
+            ) : null}
           </div>
         </div>
 
@@ -227,4 +303,4 @@ const GameplayPage = () => {
   );
 };
 
-export default GameplayPage; 
+export default GameplayPage;
