@@ -1,3 +1,50 @@
+# Card.io
+
+A fun party game that combines traditional card games with AI technology to create unique game nights for any group.
+
+## Setup Instructions
+
+### Backend Setup
+
+1. Create and activate Python virtual environment:
+   ```bash
+   cd backend/
+   python3 -m venv venv
+   source venv/bin/activate  # On Mac/Linux
+   ```
+
+2. Install dependencies:
+   ```bash
+   pip3 install -r requirements.txt
+   ```
+
+3. Set up Groq API:
+   - Create a free account at [Groq](https://groq.com/)
+   - Generate your API key
+   - Create a `.env` file in the `backend` directory with:
+     ```
+     GROQ_API_KEY="YOUR_API_KEY"
+     ```
+
+4. Start the backend server:
+   ```bash
+   uvicorn main:app --reload
+   ```
+
+### Frontend Setup
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. Start the React development server:
+   ```bash
+   npm start
+   ```
+
+The application will be available at `http://localhost:3000` with the backend running on `http://localhost:8000`.
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

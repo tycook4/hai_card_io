@@ -323,4 +323,38 @@
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+.rules-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.rules-modal {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  max-width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.rules-modal .instructions-page {
+  padding: 0;
+  margin: 0;
+}
+
+.rules-modal .navigation {
+  position: static;
+  box-shadow: none;
+  padding: 20px 0 0;
 } 

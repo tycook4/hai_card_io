@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './GameplayPage.css';
 import Card from './components/Card';
+import InstructionsPage from './InstructionsPage';
 
 const GameplayPage = () => {
   const location = useLocation();
@@ -15,6 +16,7 @@ const GameplayPage = () => {
   const [usedCards, setUsedCards] = useState([]);
   const [cardsInitialized, setCardsInitialized] = useState(false);
   const [playerPerformance, setPlayerPerformance] = useState({});
+  const [showRules, setShowRules] = useState(false);
   
   const [players, setPlayers] = useState(() => {
     return Array(playerCount).fill(null).map((_, index) => ({
@@ -62,7 +64,7 @@ const GameplayPage = () => {
 
       const colors = ["#F6D55C", "#3CAEA3", "#ED5535", "#20639B", "#173F5F"];
       const coloredCards = data.cards.map((card, index) => ({
-        ...card,
+        content: card,
         color: colors[index % colors.length]
       }));
 
@@ -85,7 +87,7 @@ const GameplayPage = () => {
   };
 
   const handleRulesClick = () => {
-    navigate('/instructions');
+    setShowRules(true);
   };
 
   const handleEndGame = () => {
@@ -93,9 +95,15 @@ const GameplayPage = () => {
       players: players.map(player => ({
         name: player.name,
         points: player.points,
-        correctAnswers: playerPerformance[player.name]?.correctCards || []
+        correctAnswers: playerPerformance[player.name]?.correctCards.map(card => card.content) || []
       })),
-      gamePreferences: gamePreferences
+      gamePreferences: {
+        ...gamePreferences,
+        theme: gamePreferences.themes || gamePreferences.theme || "General",
+        difficulty: gamePreferences.difficulty || "Medium",
+        number_of_players: playerCount,
+        categories: gamePreferences.categories || ["General Knowledge", "Fun Facts", "Would You Rather"]
+      }
     };
     
     navigate('/superlatives', { state: { gameData } });
@@ -126,16 +134,6 @@ const GameplayPage = () => {
     const player = players[playerIndex];
     const currentCard = cardDeck[currentCardIndex % cardDeck.length];
 
-    setPlayers(players.map((p, index) => 
-      index === playerIndex 
-        ? { 
-            ...p, 
-            points: p.points + 1, 
-            correctCards: [...p.correctCards, currentCard.content] 
-          }
-        : p
-    ));
-
     setPlayerPerformance(prev => {
       const updatedPerformance = { ...prev };
       
@@ -144,13 +142,28 @@ const GameplayPage = () => {
         updatedPerformance[playerName] = { correctCards: [] };
       }
       
-      updatedPerformance[playerName].correctCards.push({
-        content: currentCard.content,
-        color: currentCard.color
-      });
+      const cardExists = updatedPerformance[playerName].correctCards.some(
+        card => card.content === currentCard.content
+      );
+      
+      if (!cardExists) {
+        updatedPerformance[playerName].correctCards.push({
+          content: currentCard.content,
+          color: currentCard.color
+        });
+      }
       
       return updatedPerformance;
     });
+
+    setPlayers(players.map((p, index) => 
+      index === playerIndex 
+        ? { 
+            ...p, 
+            points: p.points + 1
+          }
+        : p
+    ));
 
     setCompletedCards((prev) => prev + 1);
   };
@@ -199,8 +212,25 @@ const GameplayPage = () => {
     }, 800);
   };
 
+  const handleLogoClick = () => {
+    navigate('/');
+  };
+
   return (
     <div className="gameplay-container">
+      {showRules && (
+        <div className="rules-modal-overlay">
+          <div className="rules-modal">
+            <InstructionsPage />
+            <button 
+              className="back-button"
+              onClick={() => setShowRules(false)}
+            >
+              Back to Game
+            </button>
+          </div>
+        </div>
+      )}
       {isLoading && (
         <div className="loading-overlay">
           <div className="loading-content">
@@ -212,7 +242,7 @@ const GameplayPage = () => {
       )}
       
       <header className="gameplay-header">
-        <h1 className="logo">Card.io</h1>
+        <h1 className="logo" onClick={handleLogoClick} style={{ cursor: 'pointer' }}>Card.io</h1>
         <div className="header-buttons">
           <button className="rules-button" onClick={handleRulesClick}>Rules</button>
           <button className="end-game-button" onClick={handleEndGame}>End Game</button>
