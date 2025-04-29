@@ -17,6 +17,7 @@ const GameplayPage = () => {
   const [cardsInitialized, setCardsInitialized] = useState(false);
   const [playerPerformance, setPlayerPerformance] = useState({});
   const [showRules, setShowRules] = useState(false);
+  const [showEndGameConfirm, setShowEndGameConfirm] = useState(false);
   
   const [players, setPlayers] = useState(() => {
     return Array(playerCount).fill(null).map((_, index) => ({
@@ -216,6 +217,19 @@ const GameplayPage = () => {
     navigate('/');
   };
 
+  const handleEndGameClick = () => {
+    setShowEndGameConfirm(true);
+  };
+
+  const handleConfirmEndGame = () => {
+    handleEndGame();
+    setShowEndGameConfirm(false);
+  };
+
+  const handleCancelEndGame = () => {
+    setShowEndGameConfirm(false);
+  };
+
   return (
     <div className="gameplay-container">
       {showRules && (
@@ -231,6 +245,24 @@ const GameplayPage = () => {
           </div>
         </div>
       )}
+      
+      {showEndGameConfirm && (
+        <div className="rules-modal-overlay">
+          <div className="rules-modal">
+            <h2 className="confirm-title">End Game?</h2>
+            <p className="confirm-message">Are you sure you want to end the game? This will take you to the superlatives page.</p>
+            <div className="confirm-buttons">
+              <button className="cancel-button" onClick={handleCancelEndGame}>
+                Cancel
+              </button>
+              <button className="confirm-button" onClick={handleConfirmEndGame}>
+                End Game
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {isLoading && (
         <div className="loading-overlay">
           <div className="loading-content">
@@ -245,7 +277,7 @@ const GameplayPage = () => {
         <h1 className="logo" onClick={handleLogoClick} style={{ cursor: 'pointer' }}>Card.io</h1>
         <div className="header-buttons">
           <button className="rules-button" onClick={handleRulesClick}>Rules</button>
-          <button className="end-game-button" onClick={handleEndGame}>End Game</button>
+          <button className="end-game-button" onClick={handleEndGameClick}>End Game</button>
         </div>
       </header>
 

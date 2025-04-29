@@ -170,6 +170,12 @@ const QuestionsPage = () => {
     }
   };
 
+  const calculateProgress = () => {
+    const totalQuestions = questions.length;
+    const currentProgress = ((currentQuestion + 1) / totalQuestions) * 100;
+    return Math.round(currentProgress);
+  };
+
   return (
     <div className="questions-page">
       <h1 className="question-title">{questions[currentQuestion].title}</h1>
@@ -192,8 +198,8 @@ const QuestionsPage = () => {
       </div>
 
       <div className="progress-bar">
-        <div className="progress-fill" style={{ width: `${progressPercentages[currentQuestion]}%` }}></div>
-        <span className="progress-text">{progressPercentages[currentQuestion]}%</span>
+        <div className="progress-fill" style={{ width: `${calculateProgress()}%` }}></div>
+        <span className="progress-text">Question {currentQuestion + 1} of {questions.length}</span>
       </div>
     </div>
   );
